@@ -25,7 +25,7 @@ const VideoTransition = () => {
     const onEnded = () => {
       setFadeOut(true);
       setTimeout(() => {
-        window.location.href = "https://0-2-xi.vercel.app/#dashboard";
+        window.location.href = "https://0-2-xi.vercel.app";
       }, 800);
     };
 
