@@ -7,6 +7,35 @@ import { motion, AnimatePresence } from "framer-motion";
 const DURATION = 0.3;
 const EASE_OUT = "easeOut";
 
+// Kick off UnicornStudio + project preload in the background.
+// Called as soon as the video starts so it loads in parallel.
+function preloadUnicornStudio() {
+  if ((window as any).__usPreloaded) return;
+  (window as any).__usPreloaded = true;
+
+  // 1. Load the UnicornStudio runtime
+  if (!(window as any).UnicornStudio) {
+    (window as any).UnicornStudio = { isInitialized: false };
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.33/dist/unicornStudio.umd.js";
+    s.onload = () => {
+      if (!(window as any).UnicornStudio.isInitialized) {
+        (window as any).UnicornStudio.init();
+        (window as any).UnicornStudio.isInitialized = true;
+      }
+    };
+    document.head.appendChild(s);
+  }
+
+  // 2. Prefetch the project JSON so the browser caches it
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.as = "fetch";
+  link.crossOrigin = "anonymous";
+  link.href = "https://cdn.unicorn.studio/v1/scene/OMzqyUv6M3kSnv0JeAtC";
+  document.head.appendChild(link);
+}
+
 const VideoTransition = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [progress, setProgress] = useState(0);
@@ -76,6 +105,12 @@ export const Newsletter = () => {
     };
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
+  useEffect(() => {
+    // Begin preloading UnicornStudio the moment the landing page mounts,
+    // so the animation is as ready as possible before the user even clicks.
+    preloadUnicornStudio();
   }, []);
 
   return (
